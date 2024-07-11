@@ -1,8 +1,11 @@
 import * as THREE from "three";
+import { Renderable } from "./renderable";
 const imagePath = "/tank-r.png";
 
-export class Tank {
+export class Tank implements Renderable {
   private _mesh: THREE.Mesh;
+
+  id: number = -1;
 
   constructor() {
     const texture = new THREE.TextureLoader().load(imagePath);
@@ -12,16 +15,20 @@ export class Tank {
     this._mesh = new THREE.Mesh(geometry, material);
   }
 
+  setId(id: number) {
+    this.id = id;
+  }
+
   setPosition([x, y]: [number, number]) {
     this._mesh.position.setX(x);
     this._mesh.position.setY(y);
   }
 
-  setRotation(deg:number) {
-    this._mesh.rotation.z = deg;
+  setRotation(rad: number) {
+    this._mesh.rotation.z = rad;
   }
 
-  getThreeObject() {
+  getMesh() {
     return this._mesh;
   }
 }

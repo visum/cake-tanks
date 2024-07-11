@@ -1,8 +1,12 @@
 import "./style.css";
 import * as THREE from "three";
-import { Tank } from "./things/tank";
-import { KeyboardInput } from "./input/keyboard";
-import { InputType } from "./input/input_device";
+import { World } from "./world";
+import { ScreenRenderer } from "./systems/screen_renderer";
+
+import { System } from "./systems/system";
+import { Position } from "./components/position";
+import { Renderable } from "./components/renderable";
+import { KeyabordInput } from "./systems/keyboard_input";
 
 const WIDTH = 800;
 const HEIGHT = 600;
@@ -25,47 +29,43 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(WIDTH, HEIGHT);
 appElement?.appendChild(renderer.domElement);
 
-const tank = new Tank();
-const tankPosition: [number, number] = [0, 0];
-let tankRotation = 0;
+const world = new World();
 
-scene.add(tank.getThreeObject());
+// tank
+const tank = world.getNewEntity("tank");
+tank.type = "tank";
+const position: Position = {
+  type: "position",
+  values: {
+    x: 0,
+    y: 0,
+    rotation: 0,
+  },
+};
+tank.components.push(position);
+const renderable: Renderable = {
+  type: "renderable",
+  values: undefined,
+};
+tank.components.push(renderable);
+world.add(tank);
 
-camera.position.z = 1;
+// keyboard input
+const keyboardInput = new KeyabordInput(document.body, tank);
 
-function animate() {
+// systems
+const systems: System[] = [];
+systems.push(new ScreenRenderer(scene));
+systems.push(keyboardInput);
+
+renderer.setAnimationLoop(process);
+
+function process() {
+  for (let i = 0; i < systems.length; i++) {
+    const sys = systems[i];
+    sys.process(world);
+  }
+  systems[0].process(world);
+
   renderer.render(scene, camera);
-  tank.setPosition(tankPosition);
-  tank.setRotation(tankRotation);
-}
-
-renderer.setAnimationLoop(animate);
-
-const keyboardInput = new KeyboardInput();
-
-keyboardInput.attach((e) => {
-  if (e === InputType.UP) {
-    const [dX, dY] = directionDistanceToDxDy(tankRotation, 1);
-    tankPosition[0] -= dX;
-    tankPosition[1] += dY;
-  }
-  if (e === InputType.DOWN) {
-    const [dX, dY] = directionDistanceToDxDy(tankRotation, -1);
-    tankPosition[0] -= dX;
-    tankPosition[1] += dY;
-  }
-  if (e === InputType.RIGHT) {
-    tankRotation -= 0.1;
-  }
-  if (e === InputType.LEFT) {
-    tankRotation += 0.1;
-  }
-});
-
-keyboardInput.start();
-
-function directionDistanceToDxDy(direction: number, distance: number) {
-  const dX = distance * Math.sin(direction);
-  const dY = distance * Math.cos(direction);
-  return [dX, dY];
 }
