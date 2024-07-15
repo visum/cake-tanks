@@ -1,6 +1,9 @@
 import { Position } from "../components/position";
-import { Entity, firstComponentByTypeOrThrow } from "../world";
+import { Entity, firstComponentByTypeOrThrow, World } from "../world";
 import { System } from "./system";
+import { Movement } from "../components/movement";
+import { Renderable } from "../components/renderable";
+import { Age } from "../components/age";
 
 /*
 Watches the keyboard and moves an entity
@@ -19,7 +22,7 @@ const defaultInputMap: Record<string, InputCommand> = {
   a: InputCommand.TURN_LEFT,
   d: InputCommand.TURN_RIGHT,
   s: InputCommand.BACK,
-  space: InputCommand.FIRE,
+  " ": InputCommand.FIRE,
 };
 
 export class KeyabordInput implements System {
@@ -39,8 +42,8 @@ export class KeyabordInput implements System {
     this._watchKeyboard();
   }
 
-  process(): void {
-    this._applyKeys();
+  process(world: World): void {
+    this._applyKeys(world);
   }
 
   private _watchKeyboard() {
@@ -56,13 +59,13 @@ export class KeyabordInput implements System {
     this._keysDown.delete(event.key);
   }
 
-  private _applyKeys() {
+  private _applyKeys(world: World) {
     for (const k of this._keysDown) {
-      this._applyKey(k);
+      this._applyKey(k, world);
     }
   }
 
-  private _applyKey(key: string) {
+  private _applyKey(key: string, world: World) {
     const mapped = this._inputMap[key];
     if (mapped == null) {
       return;
@@ -94,6 +97,38 @@ export class KeyabordInput implements System {
         break;
       case InputCommand.TURN_RIGHT:
         position.values.rotation -= 0.1;
+        break;
+      case InputCommand.FIRE:
+        this._keysDown.delete(" ");
+        const bullet = world.getNewEntity("bullet");
+        const movement: Movement = {
+          type: "movement",
+          values: {
+            direction: position.values.rotation,
+            speed: 1,
+          },
+        };
+        const renderable: Renderable = {
+          type: "renderable",
+          values: undefined,
+        };
+        const age: Age = {
+          type: "age",
+          values: { age: 0 },
+        };
+        const bulletPosition: Position = {
+          type: "position",
+          values: {
+            rotation: position.values.rotation,
+            x: position.values.x,
+            y: position.values.y,
+          },
+        };
+        bullet.components.push(movement);
+        bullet.components.push(renderable);
+        bullet.components.push(age);
+        bullet.components.push(bulletPosition);
+        world.add(bullet);
         break;
       default:
         return;

@@ -7,6 +7,7 @@ import { System } from "./systems/system";
 import { Position } from "./components/position";
 import { Renderable } from "./components/renderable";
 import { KeyabordInput } from "./systems/keyboard_input";
+import { BulletSystem } from "./systems/bullet";
 
 const WIDTH = 800;
 const HEIGHT = 600;
@@ -57,6 +58,7 @@ const keyboardInput = new KeyabordInput(document.body, tank);
 const systems: System[] = [];
 systems.push(new ScreenRenderer(scene));
 systems.push(keyboardInput);
+systems.push(new BulletSystem());
 
 renderer.setAnimationLoop(process);
 

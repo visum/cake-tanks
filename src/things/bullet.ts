@@ -1,16 +1,16 @@
 import * as THREE from "three";
 import { Renderable } from "./renderable";
 
-const imagePath = "/tank-r.png";
+const imagePath = "/bullet.png";
 
-export class Tank implements Renderable {
+export class Bullet implements Renderable {
   private _mesh: THREE.Mesh;
 
   id: number = -1;
 
   constructor() {
     const texture = new THREE.TextureLoader().load(imagePath);
-    const geometry = new THREE.PlaneGeometry(32, 32);
+    const geometry = new THREE.PlaneGeometry(16, 16);
     const material = new THREE.MeshBasicMaterial({ map: texture });
 
     this._mesh = new THREE.Mesh(geometry, material);

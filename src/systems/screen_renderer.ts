@@ -1,6 +1,7 @@
 import { World, firstComponentByTypeOrThrow } from "../world";
 import { System } from "./system";
 import { Tank } from "../things/tank";
+import { Bullet } from "../things/bullet";
 import { Renderable } from "../things/renderable";
 import * as THREE from "three";
 import { Position } from "../components/position";
@@ -25,6 +26,7 @@ type RenderableConstructor = new () => Renderable;
 
 const typeToRenderable: Record<string, RenderableConstructor> = {
   tank: Tank,
+  bullet: Bullet,
 };
 
 export class ScreenRenderer implements System {
