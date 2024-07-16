@@ -74,22 +74,25 @@ export class KeyabordInput implements System {
     switch (mapped) {
       case InputCommand.FORWARD:
         {
-          const [dX, dY] = this._directionDistanceToDxDy(
-            position.values.rotation,
-            1
-          );
-          position.values.x -= dX;
-          position.values.y += dY;
+          const tank = world.getEntitiesByType("tank")[0];
+          const movementComponent = firstComponentByTypeOrThrow(
+            tank,
+            "movement"
+          ) as Movement;
+          movementComponent.values.speed = 1;
+          movementComponent.values.direction = position.values.rotation;
         }
         break;
       case InputCommand.BACK:
         {
-          const [dX, dY] = this._directionDistanceToDxDy(
-            position.values.rotation,
-            -1
-          );
-          position.values.x -= dX;
-          position.values.y += dY;
+          const tank = world.getEntitiesByType("tank")[0];
+          const movementComponent = firstComponentByTypeOrThrow(
+            tank,
+            "movement"
+          ) as Movement;
+          movementComponent.values.speed = 1;
+          movementComponent.values.direction =
+            position.values.rotation * Math.PI;
         }
         break;
       case InputCommand.TURN_LEFT:
@@ -101,6 +104,7 @@ export class KeyabordInput implements System {
       case InputCommand.FIRE:
         this._keysDown.delete(" ");
         const bullet = world.getNewEntity("bullet");
+
         const movement: Movement = {
           type: "movement",
           values: {
@@ -135,9 +139,19 @@ export class KeyabordInput implements System {
     }
   }
 
-  private _directionDistanceToDxDy(direction: number, distance: number) {
-    const dX = distance * Math.sin(direction);
-    const dY = distance * Math.cos(direction);
-    return [dX, dY];
+  private _keyOff(command: InputCommand, world: World) {
+    switch (command) {
+      case InputCommand.BACK:
+      case InputCommand.FORWARD:
+        {
+          const tank = world.getEntitiesByType("tank")[0];
+          const movementComponent = firstComponentByTypeOrThrow(
+            tank,
+            "movement"
+          ) as Movement;
+          movementComponent.values.speed = 0;
+        }
+        break;
+    }
   }
 }

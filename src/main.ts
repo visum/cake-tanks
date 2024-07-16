@@ -8,6 +8,8 @@ import { Position } from "./components/position";
 import { Renderable } from "./components/renderable";
 import { KeyabordInput } from "./systems/keyboard_input";
 import { BulletSystem } from "./systems/bullet";
+import { Movement } from "./components/movement";
+import { TankSystem } from "./systems/tank";
 
 const WIDTH = 800;
 const HEIGHT = 600;
@@ -49,6 +51,14 @@ const renderable: Renderable = {
   values: undefined,
 };
 tank.components.push(renderable);
+const movement: Movement = {
+  type: "movement",
+  values: {
+    direction: 0,
+    speed: 0,
+  },
+};
+tank.components.push(movement);
 world.add(tank);
 
 // keyboard input
@@ -59,6 +69,7 @@ const systems: System[] = [];
 systems.push(new ScreenRenderer(scene));
 systems.push(keyboardInput);
 systems.push(new BulletSystem());
+systems.push(new TankSystem());
 
 renderer.setAnimationLoop(process);
 
