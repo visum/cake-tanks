@@ -7,9 +7,13 @@ import { System } from "./systems/system";
 import { Position } from "./components/position";
 import { Renderable } from "./components/renderable";
 import { KeyabordInput } from "./systems/keyboard_input";
-import { BulletSystem } from "./systems/bullet";
 import { Movement } from "./components/movement";
 import { TankSystem } from "./systems/tank";
+import { AgeSystem } from "./systems/age.ts";
+import { MovementSystem } from "./systems/movement.ts";
+import { MapSystem } from "./systems/map_system.ts";
+import { Rect } from "./components/rect.ts";
+
 
 const WIDTH = 800;
 const HEIGHT = 600;
@@ -20,10 +24,10 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xffffff);
 
 const camera = new THREE.OrthographicCamera(
-  WIDTH / -2,
-  WIDTH / 2,
-  HEIGHT / 2,
-  HEIGHT / -2,
+  0,
+  WIDTH,
+  HEIGHT,
+  0,
   -100,
   1000
 );
@@ -34,14 +38,16 @@ appElement?.appendChild(renderer.domElement);
 
 const world = new World();
 
+(window as any).world = world;
+
 // tank
 const tank = world.getNewEntity("tank");
 tank.type = "tank";
 const position: Position = {
   type: "position",
   values: {
-    x: 0,
-    y: 0,
+    x: 100,
+    y: 100,
     rotation: 0,
   },
 };
@@ -61,15 +67,34 @@ const movement: Movement = {
 tank.components.push(movement);
 world.add(tank);
 
+// viewport
+const viewport = world.getNewEntity("viewport");
+viewport.type = "viewport";
+
+const viewportRect: Rect = {
+  type: "rect",
+  values: {
+    width: WIDTH,
+    height: HEIGHT,
+    x: 0,
+    y: 0,
+  }
+}
+viewport.components.push(viewportRect);
+
+world.add(viewport);
+
 // keyboard input
-const keyboardInput = new KeyabordInput(document.body, tank);
+const keyboardInput = new KeyabordInput(document.body, tank, world);
 
 // systems
 const systems: System[] = [];
 systems.push(new ScreenRenderer(scene));
 systems.push(keyboardInput);
-systems.push(new BulletSystem());
+systems.push(new AgeSystem());
+systems.push(new MovementSystem());
 systems.push(new TankSystem());
+systems.push(new MapSystem("/map-test.png", world));
 
 renderer.setAnimationLoop(process);
 

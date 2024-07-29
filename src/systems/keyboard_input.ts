@@ -30,13 +30,15 @@ export class KeyabordInput implements System {
   private _target: HTMLElement;
   private _positionComponent: Position;
   private _inputMap = defaultInputMap;
+  private _world: World;
 
-  constructor(targetElement: HTMLElement, targetEntity: Entity) {
+  constructor(targetElement: HTMLElement, targetEntity: Entity, world: World) {
     this._target = targetElement;
     this._positionComponent = firstComponentByTypeOrThrow(
       targetEntity,
       "position"
     ) as Position;
+    this._world = world;
     this._onKeyDown = this._onKeyDown.bind(this);
     this._onKeyUp = this._onKeyUp.bind(this);
     this._watchKeyboard();
@@ -52,11 +54,15 @@ export class KeyabordInput implements System {
   }
 
   private _onKeyDown(event: KeyboardEvent) {
+    if(event.repeat) {
+      return;
+    }
     this._keysDown.add(event.key);
   }
 
   private _onKeyUp(event: KeyboardEvent) {
     this._keysDown.delete(event.key);
+    this._keyOff(event.key);
   }
 
   private _applyKeys(world: World) {
@@ -90,9 +96,9 @@ export class KeyabordInput implements System {
             tank,
             "movement"
           ) as Movement;
-          movementComponent.values.speed = 1;
+          movementComponent.values.speed = -1;
           movementComponent.values.direction =
-            position.values.rotation * Math.PI;
+            position.values.rotation;
         }
         break;
       case InputCommand.TURN_LEFT:
@@ -104,12 +110,13 @@ export class KeyabordInput implements System {
       case InputCommand.FIRE:
         this._keysDown.delete(" ");
         const bullet = world.getNewEntity("bullet");
-
+        const tank = world.getEntitiesByType("tank")[0];
+        const tankMovement = firstComponentByTypeOrThrow(tank, "movement") as Movement;
         const movement: Movement = {
           type: "movement",
           values: {
             direction: position.values.rotation,
-            speed: 1,
+            speed: 2.5 + tankMovement.values.speed,
           },
         };
         const renderable: Renderable = {
@@ -118,7 +125,7 @@ export class KeyabordInput implements System {
         };
         const age: Age = {
           type: "age",
-          values: { age: 0 },
+          values: { age: 0, expireAt: 50 },
         };
         const bulletPosition: Position = {
           type: "position",
@@ -139,7 +146,13 @@ export class KeyabordInput implements System {
     }
   }
 
-  private _keyOff(command: InputCommand, world: World) {
+  private _keyOff(key: string) {
+const mapped = this._inputMap[key];
+    if (mapped == null) {
+      return;
+    }
+    const command = this._inputMap[key];
+    const world = this._world;
     switch (command) {
       case InputCommand.BACK:
       case InputCommand.FORWARD:

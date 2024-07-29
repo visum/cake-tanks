@@ -11,9 +11,10 @@ export class Tank implements Renderable {
   constructor() {
     const texture = new THREE.TextureLoader().load(imagePath);
     const geometry = new THREE.PlaneGeometry(32, 32);
-    const material = new THREE.MeshBasicMaterial({ map: texture });
+    const material = new THREE.MeshBasicMaterial({ map: texture, transparent:true });
 
     this._mesh = new THREE.Mesh(geometry, material);
+    this._mesh.position.setZ(1);
   }
 
   setId(id: number) {

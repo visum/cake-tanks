@@ -11,7 +11,7 @@ export class Bullet implements Renderable {
   constructor() {
     const texture = new THREE.TextureLoader().load(imagePath);
     const geometry = new THREE.PlaneGeometry(16, 16);
-    const material = new THREE.MeshBasicMaterial({ map: texture });
+    const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
 
     this._mesh = new THREE.Mesh(geometry, material);
   }

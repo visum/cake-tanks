@@ -10,7 +10,14 @@ export type Entity = {
 };
 
 export function componentsByType(entity: Entity, type: string) {
-  return entity.components.filter((c) => c.type === type);
+  const result = [];
+  for (let i = 0; i < entity.components.length; i++) {
+    const component = entity.components[i];
+    if (component.type === type) {
+      result.push(component);
+    }
+  }
+  return result;
 }
 
 export function firstComponentByTypeOrThrow(entity: Entity, type: string) {
@@ -37,12 +44,25 @@ export function componentsByQuery(
 export class World {
   private _entities: Entity[] = [];
   private _counter = 0;
+  private _map: Entity[][] = [];
 
   get entities() {
     return this._entities;
   }
 
-  getNewEntity(type: string):Entity {
+  get map() {
+    return this._map;
+  }
+
+  set map(map: Entity[][]) {
+    this._map = map;
+  }
+
+  getMapTileAt(x: number, y: number) {
+    return this._map[x][y];
+  }
+
+  getNewEntity(type: string): Entity {
     const id = this._counter++;
     return {
       type,
@@ -65,13 +85,32 @@ export class World {
   }
 
   getEntitiesByType(type: string) {
-    return this._entities.filter((e) => e.type === type);
+    const result = [];
+    for (let i = 0; i < this._entities.length; i++) {
+      const entity = this._entities[i];
+      if (entity.type === type) {
+        result.push(entity);
+      }
+    }
+    return result;
   }
 
   getEntitiesWithComponentTypes(types: string[]) {
-    return this._entities.filter((e) =>
-      types.every((t) => componentsByType(e, t).length > 0)
-    );
+    const result = [];
+    entityLoop: for (let i = 0; i < this._entities.length; i++) {
+      const entity = this._entities[i];
+      for (let j = 0; j < types.length; j++) {
+        const type = types[j];
+        try {
+          firstComponentByTypeOrThrow(entity, type);
+        } catch {
+          continue entityLoop;
+        }
+      }
+      result.push(entity);
+    }
+
+    return result;
   }
 
   query(predicate: (e: Entity) => boolean) {
