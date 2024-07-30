@@ -89,12 +89,12 @@ const keyboardInput = new KeyabordInput(document.body, tank, world);
 
 // systems
 const systems: System[] = [];
-systems.push(new ScreenRenderer(scene));
+systems.push(new ScreenRenderer(scene, world));
 systems.push(keyboardInput);
 systems.push(new AgeSystem());
 systems.push(new MovementSystem());
 systems.push(new TankSystem());
-systems.push(new MapSystem("/map-test.png", world));
+systems.push(new MapSystem("/map1.png", world));
 
 renderer.setAnimationLoop(process);
 

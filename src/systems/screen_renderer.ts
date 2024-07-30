@@ -40,22 +40,30 @@ export class ScreenRenderer implements System {
   private _scene: THREE.Scene;
   private _renderables = new Map<number, Renderable>();
   private _entitiesInScene = new Set<Entity>();
+  private _world: World;
 
-  constructor(scene: THREE.Scene) {
+  constructor(scene: THREE.Scene, world: World) {
     this._scene = scene;
+    this._world = world;
   }
 
   process(world: World): void {
+    const viewport = world.getEntitiesByType('viewport')[0];
+    const viewportRect = firstComponentByTypeOrThrow(viewport, "rect") as Rect;
+    const collection = new Set<Entity>();
+
+    this._gatherDynamicEntities(viewportRect, collection);
+    this._gatherMapEntities(viewportRect, collection);
+    this._renderEntities(collection);
+  }
+
+  private _gatherDynamicEntities(viewportRect: Rect, collection: Set<Entity>) {
+    const world = this._world;
     const entities = world.getEntitiesWithComponentTypes([
       "renderable",
       "position",
     ]);
 
-
-    const viewport = world.getEntitiesByType('viewport')[0];
-    const viewportRect = firstComponentByTypeOrThrow(viewport, "rect") as Rect;
-
-    const entitiesInView = new Set<Entity>();
     const rectXMin = viewportRect.values.x;
     const rectXMax = viewportRect.values.x + viewportRect.values.width;
     const rectYMin = viewportRect.values.y;
@@ -65,20 +73,46 @@ export class ScreenRenderer implements System {
       const entity = entities[i];
       const position = firstComponentByTypeOrThrow(entity, "position") as Position;
       if (position.values.x > rectXMin && position.values.x < rectXMax && position.values.y > rectYMin && position.values.y < rectYMax) {
-        entitiesInView.add(entity);
+        collection.add(entity);
       }
     }
+  }
 
+  private _gatherMapEntities(viewportRect: Rect, collection: Set<Entity>) {
+    const world = this._world;
+    const entities = world.map;
+    const yMin = Math.floor(viewportRect.values.y / 32);
+    const yMax = Math.ceil(viewportRect.values.y + viewportRect.values.height / 32);
+    const xMin = Math.floor(viewportRect.values.x / 32);
+    const xMax = Math.floor(viewportRect.values.x + viewportRect.values.width / 32);
+
+    const visibleRows = entities.slice(yMin, yMax);
+    for (let i = 0; i < visibleRows.length; i++) {
+      const row = visibleRows[i];
+      for (let x = xMin; x <= xMax; x++) {
+        collection.add(row[x]);
+      }
+    }
+  }
+
+  private _renderEntities(entitiesInView: Set<Entity>) {
     const toPrune = this._entitiesInScene.difference(entitiesInView);
     const newEntities = entitiesInView.difference(this._entitiesInScene);
 
     for (const e of toPrune) {
       this._entitiesInScene.delete(e);
       const renderable = this._renderables.get(e.id);
+      if (renderable == null) {
+        continue;
+      }
       this._scene.remove(renderable.getMesh());
     }
 
     for (const entity of newEntities) {
+      // survive an undefined map tile
+      if (entity == null) {
+        continue;
+      }
       let renderable = this._renderables.get(entity.id);
       if (renderable == null) {
         const C = this._getRenderableConstructorForType(entity.type);
@@ -98,19 +132,18 @@ export class ScreenRenderer implements System {
 
     // update entities positions
     for (const entity of entitiesInView) {
+      if (entity == null) {
+        continue;
+      }
       const renderable = this._renderables.get(entity.id);
+      if (renderable == null) {
+        continue;
+      }
       const pos = firstComponentByTypeOrThrow(entity, "position") as Position;
       renderable.setPosition([pos.values.x, pos.values.y]);
       renderable.setRotation(pos.values.rotation);
     }
 
-  }
-
-  private _renderDynamicEntities() {
-
-  }
-
-  private _renderMapEntities() {
 
   }
 

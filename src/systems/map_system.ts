@@ -59,9 +59,10 @@ export class MapSystem implements System {
       for (let x = 0; x < row.length; x++) {
         const tile = row[x];
         const entityFactory = this._tileTypeToEntityFactory[tile];
-
-        const entity = entityFactory.call(this, x, y);
-        this._mapEntities[y][x] = entity;
+        if (entityFactory != null) {
+          const entity = entityFactory.call(this, x, y);
+          this._mapEntities[y][x] = entity;
+        }
       }
     }
 
@@ -85,8 +86,9 @@ export class MapSystem implements System {
       const pixels = ctx.getImageData(0, 0, img.width, img.height).data;
       // the image is read from the top-left, so we need to
       // invert the y axis
-      for (let y = canvas.height - 1; y >= 0; y--) {
-        this._tiles[y] = [];
+      for (let y = canvas.height; y > 0; y--) {
+        const yIndex = canvas.height - y;
+        this._tiles[yIndex] = [];
         for (let x = 0; x < canvas.width; x++) {
           const index = (y * canvas.width + x) * 4;
           const r = pixels[index];
@@ -95,7 +97,7 @@ export class MapSystem implements System {
 
           const pixel = `${r},${g},${b}`;
 
-          this._tiles[y][x] = colorToType[pixel];
+          this._tiles[yIndex][x] = colorToType[pixel];
         }
       }
       this._addEntities();
