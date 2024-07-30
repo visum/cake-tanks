@@ -13,6 +13,7 @@ import { AgeSystem } from "./systems/age.ts";
 import { MovementSystem } from "./systems/movement.ts";
 import { MapSystem } from "./systems/map_system.ts";
 import { Rect } from "./components/rect.ts";
+import { CameraCenteringSystem } from "./systems/camera_centering_system.ts";
 
 
 const WIDTH = 800;
@@ -46,8 +47,8 @@ tank.type = "tank";
 const position: Position = {
   type: "position",
   values: {
-    x: 100,
-    y: 100,
+    x: 400,
+    y: 300,
     rotation: 0,
   },
 };
@@ -95,6 +96,7 @@ systems.push(new AgeSystem());
 systems.push(new MovementSystem());
 systems.push(new TankSystem());
 systems.push(new MapSystem("/map1.png", world));
+systems.push(new CameraCenteringSystem(camera));
 
 renderer.setAnimationLoop(process);
 
