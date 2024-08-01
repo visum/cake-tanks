@@ -1,13 +1,16 @@
 import * as THREE from "three";
-import {Renderable} from "./renderable.ts";
-import {BasicTile} from "./basic_tile.ts";
+import { BasicTile } from "./basic_tile.ts";
+
+const imagePath = "/base.png";
+const texture = new THREE.TextureLoader().load(imagePath);
+
 
 export class BaseThing extends BasicTile {
-  get _size() {
-    return [32,32];
+  get _size(): [number, number] {
+    return [32, 32];
   }
 
-  get _imagePath() {
-    return "/base.png";
+  protected _getTexture() {
+    return texture;
   }
 }

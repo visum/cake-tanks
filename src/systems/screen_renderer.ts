@@ -9,6 +9,9 @@ import { Rect } from "../components/rect";
 import { TreeThing } from "../things/tree.ts";
 import { GrassThing } from "../things/grass.ts";
 import { BaseThing } from "../things/base.ts";
+import { RoadThing } from "../things/road.ts";
+import { WallThing } from "../things/wall.ts";
+import { PillboxThing } from "../things/pillbox.ts";
 
 /*
 Scene Renderer
@@ -34,6 +37,9 @@ const typeToRenderable: Record<string, RenderableConstructor> = {
   tree: TreeThing,
   grass: GrassThing,
   base: BaseThing,
+  road: RoadThing,
+  wall: WallThing,
+  pillbox: PillboxThing,
 };
 
 export class ScreenRenderer implements System {
@@ -81,10 +87,10 @@ export class ScreenRenderer implements System {
   private _gatherMapEntities(viewportRect: Rect, collection: Set<Entity>) {
     const world = this._world;
     const entities = world.map;
-    const yMin = Math.floor(viewportRect.values.y / 32);
-    const yMax = Math.ceil(viewportRect.values.y + viewportRect.values.height / 32);
+    const yMin = Math.max(Math.floor(viewportRect.values.y / 32), 0);
+    const yMax = Math.ceil((viewportRect.values.y + viewportRect.values.height) / 32) + 1;
     const xMin = Math.floor(viewportRect.values.x / 32);
-    const xMax = Math.floor(viewportRect.values.x + viewportRect.values.width / 32);
+    const xMax = Math.floor((viewportRect.values.x + viewportRect.values.width) / 32) + 1;
 
     const visibleRows = entities.slice(yMin, yMax);
     for (let i = 0; i < visibleRows.length; i++) {
@@ -106,6 +112,7 @@ export class ScreenRenderer implements System {
         continue;
       }
       this._scene.remove(renderable.getMesh());
+      this._entitiesInScene.delete(e);
     }
 
     for (const entity of newEntities) {

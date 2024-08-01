@@ -33,9 +33,13 @@ export class MapSystem implements System {
   private _mapEntities: Entity[][] = [];
 
   private _tileTypeToEntityFactory: Record<TileType, (x: number, y: number) => Entity> = {
-    [TileType.TREE]: this._getTree,
-    [TileType.GRASS]: this._getGrass,
-    [TileType.BASE]: this._getBase
+    [TileType.TREE]: (x, y) => this._getMapTile("tree", x, y),
+    [TileType.GRASS]: (x, y) => this._getMapTile("grass", x, y),
+    [TileType.BASE]: (x, y) => this._getMapTile("base", x, y),
+    [TileType.ROAD]: (x, y) => this._getMapTile("road", x, y),
+    [TileType.WATER]: (x, y) => this._getMapTile("water", x, y),
+    [TileType.PILLBOX]: (x, y) => this._getMapTile("pillbox", x, y),
+    [TileType.WALL]: (x, y) => this._getMapTile("wall", x, y),
   };
 
   constructor(imagePath: string, world: World) {
@@ -86,18 +90,18 @@ export class MapSystem implements System {
       const pixels = ctx.getImageData(0, 0, img.width, img.height).data;
       // the image is read from the top-left, so we need to
       // invert the y axis
-      for (let y = canvas.height; y > 0; y--) {
+      for (let y = canvas.height - 1; y >= 0; y--) {
         const yIndex = canvas.height - y;
-        this._tiles[yIndex] = [];
+        this._tiles[y] = [];
         for (let x = 0; x < canvas.width; x++) {
-          const index = (y * canvas.width + x) * 4;
+          const index = (4 * x) + (yIndex * canvas.width * 4);
           const r = pixels[index];
           const g = pixels[index + 1];
           const b = pixels[index + 2];
 
           const pixel = `${r},${g},${b}`;
 
-          this._tiles[yIndex][x] = colorToType[pixel];
+          this._tiles[y][x] = colorToType[pixel];
         }
       }
       this._addEntities();
@@ -108,44 +112,8 @@ export class MapSystem implements System {
     }
   }
 
-  private _getTree(x: number, y: number) {
-    const e = this._world.getNewEntity("tree");
-    const position: Position = {
-      type: "position",
-      values: {
-        x: x * MAP_TILE_PIXEL_SIZE, y: y * MAP_TILE_PIXEL_SIZE,
-        rotation: 0
-      }
-    };
-    e.components.push(position);
-    const renderable: Renderable = {
-      type: "renderable",
-      values: undefined
-    };
-    e.components.push(renderable);
-    return e;
-  }
-
-  private _getGrass(x: number, y: number) {
-    const e = this._world.getNewEntity("grass");
-    const position: Position = {
-      type: "position",
-      values: {
-        x: x * MAP_TILE_PIXEL_SIZE, y: y * MAP_TILE_PIXEL_SIZE, rotation: 0
-      }
-    }
-    e.components.push(position);
-    const renderable: Renderable = {
-      type: "renderable",
-      values: undefined
-    };
-    e.components.push(renderable);
-    return e;
-  }
-
-
-  private _getBase(x: number, y: number) {
-    const e = this._world.getNewEntity("base");
+  private _getMapTile(type: string, x: number, y: number) {
+    const e = this._world.getNewEntity(type);
     const position: Position = {
       type: "position",
       values: {
@@ -158,7 +126,7 @@ export class MapSystem implements System {
     const renderable: Renderable = {
       type: "renderable",
       values: undefined,
-    };
+    }
     e.components.push(renderable);
 
     return e;

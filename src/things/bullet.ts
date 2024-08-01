@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { Renderable } from "./renderable";
 
 const imagePath = "/bullet.png";
+const texture = new THREE.TextureLoader().load(imagePath);
 
 export class Bullet implements Renderable {
   private _mesh: THREE.Mesh;
@@ -9,7 +10,6 @@ export class Bullet implements Renderable {
   id: number = -1;
 
   constructor() {
-    const texture = new THREE.TextureLoader().load(imagePath);
     const geometry = new THREE.PlaneGeometry(16, 16);
     const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
 

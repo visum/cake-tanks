@@ -1,11 +1,10 @@
 import * as THREE from "three";
 import { BasicTile } from "./basic_tile.ts";
 
-const imagePath = "/tree.png";
+const imagePath = '/road.png';
 const texture = new THREE.TextureLoader().load(imagePath);
 
-
-export class TreeThing extends BasicTile {
+export class RoadThing extends BasicTile {
   get _size(): [number, number] {
     return [32, 32];
   }
@@ -13,5 +12,5 @@ export class TreeThing extends BasicTile {
   protected _getTexture(): THREE.Texture {
     return texture;
   }
-}
 
+}
