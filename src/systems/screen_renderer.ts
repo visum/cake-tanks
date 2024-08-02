@@ -11,6 +11,7 @@ import { GrassThing } from "../things/grass.ts";
 import { BaseThing } from "../things/base.ts";
 import { RoadThing } from "../things/road.ts";
 import { WallThing } from "../things/wall.ts";
+import { WaterThing } from "../things/water.ts";
 import { PillboxThing } from "../things/pillbox.ts";
 
 /*
@@ -40,6 +41,7 @@ const typeToRenderable: Record<string, RenderableConstructor> = {
   road: RoadThing,
   wall: WallThing,
   pillbox: PillboxThing,
+  water: WaterThing,
 };
 
 export class ScreenRenderer implements System {

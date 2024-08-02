@@ -1,19 +1,21 @@
-import {Movement} from "../components/movement";
-import {Position} from "../components/position";
-import {System} from "./system.ts";
-import {firstComponentByTypeOrThrow} from "../world.ts";
+import { World } from "../world.ts";
+import { Movement } from "../components/movement";
+import { Position } from "../components/position";
+import { System } from "./system.ts";
+import { firstComponentByTypeOrThrow } from "../world.ts";
 
 export class MovementSystem implements System {
-  process (world: World) {
+  process(world: World) {
     const entities = world.getEntitiesWithComponentTypes(["movement", "position"]);
 
     for (let i = 0; i < entities.length; i++) {
       const entity = entities[i];
       const movementComponent = firstComponentByTypeOrThrow(entity, "movement") as Movement;
       const positionComponent = firstComponentByTypeOrThrow(entity, "position") as Position;
+      const speedWithDrag = movementComponent.values.speed * (movementComponent.values.drag ?? 1);
       const [dX, dY] = this._directionDistanceToDxDy(
         movementComponent.values.direction,
-        movementComponent.values.speed,
+        speedWithDrag,
       );
 
       positionComponent.values.x -= dX;
@@ -22,7 +24,7 @@ export class MovementSystem implements System {
     }
   }
 
-private _directionDistanceToDxDy(direction: number, distance: number) {
+  private _directionDistanceToDxDy(direction: number, distance: number) {
     const dX = distance * Math.sin(direction);
     const dY = distance * Math.cos(direction);
     return [dX, dY];

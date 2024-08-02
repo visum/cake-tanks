@@ -5,5 +5,6 @@ export interface Movement extends Component {
   values: {
     speed: number;
     direction: number;
+    drag?: number;
   };
 }

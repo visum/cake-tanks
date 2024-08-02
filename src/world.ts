@@ -1,3 +1,5 @@
+const MAP_TILE_SIZE = 32;
+
 export interface Component {
   type: string;
   values: unknown;
@@ -59,7 +61,7 @@ export class World {
   }
 
   getMapTileAt(x: number, y: number) {
-    return this._map[x][y];
+    return this._map[y][x];
   }
 
   getNewEntity(type: string): Entity {
@@ -115,5 +117,12 @@ export class World {
 
   query(predicate: (e: Entity) => boolean) {
     return this._entities.filter(predicate);
+  }
+
+  getMapTileForCoords(x: number, y: number) {
+    const mapX = Math.round(x / MAP_TILE_SIZE);
+    const mapY = Math.round(y / MAP_TILE_SIZE);
+    // console.log(mapX, mapY);
+    return this.getMapTileAt(mapX, mapY);
   }
 }

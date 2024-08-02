@@ -8,12 +8,13 @@ import { Position } from "./components/position";
 import { Renderable } from "./components/renderable";
 import { KeyabordInput } from "./systems/keyboard_input";
 import { Movement } from "./components/movement";
-import { TankSystem } from "./systems/tank";
 import { AgeSystem } from "./systems/age.ts";
 import { MovementSystem } from "./systems/movement.ts";
 import { MapSystem } from "./systems/map_system.ts";
 import { Rect } from "./components/rect.ts";
 import { CameraCenteringSystem } from "./systems/camera_centering_system.ts";
+import { TerrainComponent } from "./components/terrain.ts";
+import { TerrainSystem } from "./systems/terrain_system.ts";
 
 
 const WIDTH = 800;
@@ -66,6 +67,11 @@ const movement: Movement = {
   },
 };
 tank.components.push(movement);
+const terrain: TerrainComponent = {
+  type: "terrain",
+  values: null
+};
+tank.components.push(terrain);
 world.add(tank);
 
 // viewport
@@ -93,8 +99,8 @@ const systems: System[] = [];
 systems.push(new ScreenRenderer(scene, world));
 systems.push(keyboardInput);
 systems.push(new AgeSystem());
+systems.push(new TerrainSystem());
 systems.push(new MovementSystem());
-systems.push(new TankSystem());
 systems.push(new MapSystem("/map1.png", world));
 systems.push(new CameraCenteringSystem(camera));
 

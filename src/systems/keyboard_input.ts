@@ -54,7 +54,7 @@ export class KeyabordInput implements System {
   }
 
   private _onKeyDown(event: KeyboardEvent) {
-    if(event.repeat) {
+    if (event.repeat) {
       return;
     }
     this._keysDown.add(event.key);
@@ -85,7 +85,7 @@ export class KeyabordInput implements System {
             tank,
             "movement"
           ) as Movement;
-          movementComponent.values.speed = 1;
+          movementComponent.values.speed = 2;
           movementComponent.values.direction = position.values.rotation;
         }
         break;
@@ -96,7 +96,7 @@ export class KeyabordInput implements System {
             tank,
             "movement"
           ) as Movement;
-          movementComponent.values.speed = -1;
+          movementComponent.values.speed = -2;
           movementComponent.values.direction =
             position.values.rotation;
         }
@@ -116,7 +116,7 @@ export class KeyabordInput implements System {
           type: "movement",
           values: {
             direction: position.values.rotation,
-            speed: 2.5 + tankMovement.values.speed,
+            speed: 3.5 + tankMovement.values.speed,
           },
         };
         const renderable: Renderable = {
@@ -147,7 +147,7 @@ export class KeyabordInput implements System {
   }
 
   private _keyOff(key: string) {
-const mapped = this._inputMap[key];
+    const mapped = this._inputMap[key];
     if (mapped == null) {
       return;
     }
